@@ -57,7 +57,7 @@ class Point:
 		self.x, self.y = self.x/n, self.y/n
 	
 	def as_tuple(self):
-		return (self.x, self.y)
+		return (int(self.x), int(self.y))
 	
 	def rotate(self, angle):
 		cosa, sina = cos(angle), sin(angle)
@@ -311,12 +311,12 @@ class Ball(WorldObject):
 		self.v = Point(0, 0)	# Speed
 	def draw(self, screen):
 		ORANGE = (255,60,0)
-		draw.circle(screen, ORANGE, self.center.as_tuple(), self.radius)
+		draw.circle(screen, ORANGE, self.center.as_tuple(), int(self.radius))
 	def simulate(self):
 		"Ball's movement is simple linear integration with coulomb friction"
 		# We have measured that a typical ball has a friction deceleration of about 
-		# -0.15 m/s^2. This is equal to 150 mm / 1mln ms^2 = 30pixels / 1000000 ms^2 = 0.00003 px/ms^2
-		FRICTION_FORCE = 0.0003
+		# -0.25 m/s^2. This is equal to 250 mm / 1mln ms^2 = 50pixels / 1000000 ms^2 = 0.00005 px/ms^2
+		FRICTION_FORCE = 0.00005
 		n = self.v.norm()
 		if (n > 0):
 			# Move

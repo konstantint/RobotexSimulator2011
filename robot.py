@@ -136,11 +136,11 @@ class Robot(WorldObject):
 	def wheels(self, left, right):
 		"""
 			Sets the wheel speed. Left and right must be numbers -100..100.
-			The speed is given in 'pixels per second'. 100 pixels per second is 0.5 m/s.
+			100 is 1 m/s.
 		"""
 		with self.data_lock:
-			self.leftSpeed = left/1000.0
-			self.rightSpeed = right/1000.0
+			self.leftSpeed = 2*left/1000.0	# leftSpeed and rightSpeed are in pixels per second
+			self.rightSpeed = 2*right/1000.0
 	
 	def grab(self):
 		"If at the moment this function is called there is a ball right at the front of the robot, the ball is 'grabbed'"
@@ -174,7 +174,7 @@ class Robot(WorldObject):
 		with self.grabbed_ball_lock:
 			if self.grabbed_ball is not None:
 				self.grabbed_ball.center = self.center + self.forward*(self.grabbed_forward + 10) + self.left*self.grabbed_left
-				# Shoots the ball at 400 pixels per second (2.0 m/s)
+				# Shoots the ball at 0.4 pixels per millisecond (2.0 m/s)
 				self.grabbed_ball.v = self.forward * 0.4	
 				self.grabbed_ball = None
 	
