@@ -17,36 +17,59 @@ def input(events):
 			pass #print event
 
 def main():
+	# Read two parameters identifying modules for the first and the second robots.
+	if (len(sys.argv) < 3):
+		print "Usage: python main.py <first_robot> <second_robot> [random seed]"
+		print ""
+		print "The <first_robot> and <second_robot> should identify modules containing classes Robot and RobotServer"
+		print "E.g if you invoke "
+		print "  python main.py telliskivi ekrs"
+		print "The simulator will import telliskivi.Robot, telliskivi.RobotServer, ekrs.Robot, ekrs.RobotServer"
+		sys.exit(1)
+	
+	# Try to import modules
+	r1module = __import__(sys.argv[1])
+	r2module = __import__(sys.argv[2])
+	(a,b,c,d) = (r1module.Robot, r1module.RobotServer, r2module.Robot, r2module.RobotServer) # Testing
+	random_seed = int(sys.argv[3]) if len(sys.argv) > 3 else None
+	# random seeds 1,2,3,4 are already interesting use cases
+	
 	# Init graphics
 	pygame.init()
 	window = pygame.display.set_mode((1060, 760)) # This is the size of the field + contestant area. (5300 x 3800)
 	pygame.display.set_caption('Robotex 2011 Simulator') 
 	screen = pygame.display.get_surface() 
-	
+
 	# Init world. 
 	world = World(screen)
 
 	# Add 11 balls (coordinates are world-coords)
-	#random.seed(3)
-	for i in range(11):
-		world.add_object(Ball(Point(random.uniform(10,world.width-10),random.uniform(10,world.height-10))))
+	# Make sure the balls are added symmetrically. That means the first ball goes in the center
+	world.add_object(Ball(Point(world.width/2, world.height/2)))	
+	for i in range(5):
+		while True:
+			xpos = random.uniform(10,world.width-10)
+			ypos = random.uniform(10,world.height-10)
+			# Make sure the positions do not get in the robot's starting corners ( 0..60px, i.e. 0..60px )
+			if not ((xpos < 60 and ypos < 60) or (xpos > world.width - 60 and ypos > world.height - 60)):
+				break
+		world.add_object(Ball(Point(xpos, ypos)))
+		world.add_object(Ball(Point(world.width-xpos, world.height-ypos)))
 	
 	# Create two robots
-	robot1 = Robot(world, "Robot A", Point(12+45/2, 12+35/2), beacon_point = Point(world.width + 50, world.cy))
-	robot1.rotate(3.1415/2)
-	robot2 = Robot(world, "Robot B", Point(world.width-(12+45/2), world.height-(12+35/2)),  beacon_point = Point(-50, world.cy))
-	robot2.rotate(-3.1415/2)
+	robot1 = r1module.Robot(world, "Robot A", "TOPLEFT")
+	robot2 = r2module.Robot(world, "Robot B", "BOTTOMRIGHT")
 	world.add_object(robot1)
 	world.add_object(robot2)
-		
+	
 	# Start robot command servers
-	RobotServer(robot1, 5000).serve()
-	RobotServer(robot2, 5001).serve()
+	r1module.RobotServer(robot1, 5000).serve()
+	r2module.RobotServer(robot2, 5001).serve()
 	
 	# Do the simulation/drawing/event cycle
 	last_sim = -1000
 	last_draw = -1000
-	while True: 
+	while True:
 		t = get_ticks()
 		if (t - last_sim) > 1:
 			# Simulate world (~1 iteration once every millisecond or so)

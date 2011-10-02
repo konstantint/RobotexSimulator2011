@@ -20,7 +20,7 @@ class Point:
 	 >>> p
 	 Point(3.000000, 6.000000)
 	 >>> p.as_tuple()
-	 (3.0, 6.0)
+	 (3, 6)
 	 >>> Point(1, 2) + Point(2, 2)
 	 Point(3.000000, 4.000000)
 	 >>> Point(4, 1)*(-0.5)
@@ -55,7 +55,11 @@ class Point:
 	def normalize(self):
 		n = self.norm()
 		self.x, self.y = self.x/n, self.y/n
-	
+
+	def normalized(self):
+		n = self.norm()
+		return Point(self.x/n, self.y/n)
+		
 	def as_tuple(self):
 		return (int(self.x), int(self.y))
 	
@@ -125,6 +129,7 @@ class World:
 		* draw			- render the world on a pygame surface.
 	Here's how it goes typically
 	>>> import pygame
+	>>> from telliskivi import Robot
 	>>> (_1, _2) = pygame.init()
 	>>> window = pygame.display.set_mode((1060, 760)) # This is the recommended size of the window (field + contestant area - (5300 x 3800 mm))
 	>>> screen = pygame.display.get_surface() 
@@ -134,7 +139,7 @@ class World:
 	>>> w.height
 	600
 	>>> w.add_object(Ball(Point(300, 300)))				# Add a ball at position (300, 300)
-	>>> w.add_object(Robot(w, "Robot", Point(500, 500)))# Add a robot at position(500, 500)
+	>>> w.add_object(Robot(w, "Robot", "TOPLEFT"))      # Add a robot
 	>>> for i in range(50):								# Simulate a bit
 	...    w.simulate()
 	>>> w.draw(screen)									# Draw on screen
@@ -302,11 +307,11 @@ class WorldObject:
 # -------------- "Ball" and "Robot" are objects in the world -------------------
 # Both know how to draw themselves, how to simulate themselves and how to react to
 # collisions with walls and other objects
-# Robot is given in robot.py
+# Robot is given in <your_robot_name>.py
 
 class Ball(WorldObject):
 	"""The ball is the most basic world object"""
-	def __init__(self, center, radius = 5):	# Actual radius is 43/2 mm, i.e. 4.3 pixels
+	def __init__(self, center, radius = 4.3):	# Actual radius is 43/2 mm, i.e. 4.3 pixels
 		WorldObject.__init__(self, center, radius)
 		self.v = Point(0, 0)	# Speed
 	def draw(self, screen):
@@ -362,3 +367,8 @@ class Ball(WorldObject):
 					steal_v = direction_normalized*towards_v
 					obj.v.add(steal_v*(-1))
 					self.v.add(steal_v)
+
+if __name__ == "__main__":
+	# Run doctests (hint, run with -v for verbose output)
+	import doctest
+	doctest.testmod()
